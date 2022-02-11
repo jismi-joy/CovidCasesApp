@@ -1,0 +1,28 @@
+server:
+  port: 9000
+  tomcat:
+    internal-proxies: .*
+    accept-count: 10000
+    max-threads: 20000
+    max-connections: 1000000
+    max-swallow-size: 200MB
+    max-http-form-post-size: 200MB
+    min-spare-threads: 1000
+spring:
+  mvc:
+    async:
+      request-timeout: 4000 
+  devtools:
+    livereload:
+      enabled: false
+logging:
+  file:
+     name: D:\jismi\Goethe\logs\covidcases.log
+  pattern:
+    console: "%d %-5level %logger{16} : %msg%n"
+    file: "%d %-5level [%thread] %logger{16} : %msg%n"
+  level:
+    org.springframework.web: ERROR
+    com.oracle.fusion: INFO
+    org.hibernate: ERROR  
+    
