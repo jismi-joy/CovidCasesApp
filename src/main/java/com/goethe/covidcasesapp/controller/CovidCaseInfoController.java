@@ -4,6 +4,7 @@ package com.goethe.covidcasesapp.controller;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.goethe.covidcasesapp.service.CovidDataService;
 import com.goethe.covidcasesapp.vo.CovidCasesInfoResponse;
 
 /**
@@ -25,40 +27,23 @@ import com.goethe.covidcasesapp.vo.CovidCasesInfoResponse;
 public class CovidCaseInfoController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CovidCaseInfoController.class);
-
+    @Autowired
+	private CovidDataService covidDataService;
 	/**
 	 * 
 	 * @param state
 	 * @param city
-	 * @return
+	 * @return json output of city and covid case count
 	 */
 	 
 	@GetMapping(value = "/getcovidcases/{state}/{city}")
 	public ResponseEntity getCovidCases(@PathVariable(name="state") String state, @PathVariable(name="city") String city) {
 		LOGGER.info("In getCovidCases");
+	
 		if(isInvalidParam(state, city)) {
 			return new ResponseEntity("Invalid Params", HttpStatus.BAD_REQUEST);
 		}
-		// Calling rest api
-		final String uri = "https://data.covid19india.org/state_district_wise.json";
-		RestTemplate restTemplate = new RestTemplate();
-		String result = restTemplate.getForObject(uri, String.class);
-		JSONObject obj = new JSONObject(result);
-		JSONObject stateData = new JSONObject(obj.get(state).toString());
-		
-		JSONObject districtData = new JSONObject(stateData.get("districtData").toString());
-		JSONObject cityData  =  new JSONObject(districtData.get(city).toString());
-	
-
-		long covidCount = cityData.getLong("active");
-		CovidCasesInfoResponse covidResponse = new CovidCasesInfoResponse();
-		covidResponse.setCity(city);
-		covidResponse.setCountCases(covidCount);
-		
-		System.out.println(covidCount);
-
-		LOGGER.debug("Called rest api getAuthToken in debug");
-		return new ResponseEntity<CovidCasesInfoResponse>( covidResponse, HttpStatus.OK);
+		return new ResponseEntity<CovidCasesInfoResponse>( covidDataService.getCovidData(state, city), HttpStatus.OK);
 	}
 
     private boolean isInvalidParam(String state, String city) {
